@@ -41,6 +41,7 @@ export const AnalyzeChat: React.FC = () => {
 
     setLoading(true);
     setError('');
+    setResult(null); // Reset previous results
     
     try {
       const response = await analysisAPI.analyzeTranscript({
@@ -67,9 +68,29 @@ export const AnalyzeChat: React.FC = () => {
     }
   };
 
+  // Safe data access functions
+  const getOverallScore = () => {
+    if (!result?.overall_scores) return { percentage: 0, total: 0, max: 45 };
+    return {
+      percentage: result.overall_scores.percentage_score || 0,
+      total: result.overall_scores.total_score || 0,
+      max: result.overall_scores.max_possible_score || 45
+    };
+  };
+
+  const getAnalysisData = (key: string) => {
+    if (!result || !result[key]) return { reasoning: 'No data available', score: 0 };
+    return {
+      reasoning: result[key]?.reasoning || 'No reasoning provided.',
+      score: result[key]?.score || 0
+    };
+  };
+
+  const scoreData = getOverallScore();
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: '#1a237e' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: '#1d1d1f' }}>
         Analyze Chat Transcript
       </Typography>
 
@@ -157,15 +178,15 @@ export const AnalyzeChat: React.FC = () => {
                     </Typography>
                     <Box display="flex" alignItems="center" gap={3}>
                       <Typography variant="h2" sx={{ fontWeight: 'bold', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
-                        {result.overall_scores.percentage_score}%
+                        {scoreData.percentage}%
                       </Typography>
                       <Box flexGrow={1}>
                         <Typography variant="h6" sx={{ mb: 1, opacity: 0.9 }}>
-                          {result.overall_scores.total_score}/{result.overall_scores.max_possible_score} Points
+                          {scoreData.total}/{scoreData.max} Points
                         </Typography>
                         <LinearProgress 
                           variant="determinate" 
-                          value={result.overall_scores.percentage_score} 
+                          value={scoreData.percentage} 
                           sx={{ 
                             height: 20, 
                             borderRadius: 2,
@@ -183,10 +204,10 @@ export const AnalyzeChat: React.FC = () => {
               </Box>
 
               {/* KPI Metrics */}
-              <KPIMetrics result={result} />
+              {result && <KPIMetrics result={result} />}
 
               {/* Score Breakdown Chart */}
-              <ScoreBreakdownChart result={result} />
+              {result && <ScoreBreakdownChart result={result} />}
 
               {/* Detailed Reasoning */}
               <Typography variant="h6" gutterBottom sx={{ mt: 4, mb: 2, fontWeight: 600 }}>
@@ -201,30 +222,32 @@ export const AnalyzeChat: React.FC = () => {
                 { key: 'time_respect_analysis', title: 'Respectful of Customer\'s Time' },
                 { key: 'needs_identification_analysis', title: 'Identify Contact\'s Needs and Avoid Redundant Asks' },
                 { key: 'transfer_analysis', title: 'Voice Services Question Analysis' },
-              ].map(({ key, title }) => (
-                <Accordion key={key} sx={{ mb: 1 }}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography variant="body2" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                      {result[key]?.reasoning || 'No reasoning provided.'}
-                    </Typography>
-                    {result[key]?.score !== undefined && (
+              ].map(({ key, title }) => {
+                const analysis = getAnalysisData(key);
+                return (
+                  <Accordion key={key} sx={{ mb: 1 }}>
+                    <AccordionSummary expandIcon={<ExpandMore />}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{title}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography variant="body2" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                        {analysis.reasoning}
+                      </Typography>
                       <Box mt={2} p={2} sx={{ backgroundColor: '#f5f5f5', borderRadius: 1 }}>
                         <Typography variant="body2" color="textSecondary">
-                          Score: {result[key].score}
+                          Score: {analysis.score}
                         </Typography>
                       </Box>
-                    )}
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })}
             </Paper>
           </Grid>
         )}
       </Grid>
     </Container>
   );
-}
+};
+
 export default AnalyzeChat;

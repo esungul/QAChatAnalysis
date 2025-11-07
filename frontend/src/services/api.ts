@@ -24,7 +24,16 @@ export const analysisAPI = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request),
     });
-    return handleResponse(response);
+    
+    const data = await handleResponse(response);
+    
+    // Validate the response structure
+    if (!data.result || !data.result.overall_scores) {
+      console.warn('Unexpected API response structure:', data);
+      throw new APIError('Invalid response format from server');
+    }
+    
+    return data;
   },
 
   getAnalyses: async (limit: number = 50, offset: number = 0): Promise<{ analyses: AnalysisSummary[] }> => {
@@ -39,12 +48,6 @@ export const analysisAPI = {
 
   getDashboardStats: async (): Promise<DashboardStats> => {
     const response = await fetch(`${API_BASE}/api/dashboard/stats`);
-    return handleResponse(response);
-  },
-
-  // Health check endpoint
-  healthCheck: async (): Promise<{ message: string; version: string }> => {
-    const response = await fetch(`${API_BASE}/`);
     return handleResponse(response);
   },
 };

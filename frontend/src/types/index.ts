@@ -1,18 +1,19 @@
 export interface AnalysisResult {
-  overall_scores: {
-    total_score: number;
-    max_possible_score: number;
-    percentage_score: number;
+  overall_scores?: {
+    total_score?: number;
+    max_possible_score?: number;
+    percentage_score?: number;
   };
-  first_response_analysis: any;
-  security_verification_analysis: any;
-  customer_needs_analysis: any;
-  interaction_analysis: any;
-  time_respect_analysis: any;
-  needs_identification_analysis: any;
-  transfer_analysis: any;
+  first_response_analysis?: any;
+  security_verification_analysis?: any;
+  customer_needs_analysis?: any;
+  interaction_analysis?: any;
+  time_respect_analysis?: any;
+  needs_identification_analysis?: any;
+  transfer_analysis?: any;
   [key: string]: any;
 }
+
 
 export interface AnalysisRequest {
   transcript: string;
@@ -40,3 +41,6 @@ export interface AnalysisSummary {
   percentage_score: number;
   created_at: string;
 }
+
+
+
