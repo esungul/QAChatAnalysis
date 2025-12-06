@@ -17,7 +17,7 @@ World-class web-based tool for analyzing customer service calls/chats using Open
 - For multi-transaction: Update app.py to loop over inputs.
 
 
-esungul@Sunnys-MacBook-Air qa_analysis_tool % export OPENAI_API_KEY=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
+
 /Users/esungul/Documents/Projects/WindstreamQA/qa_analysis_tool
 esungul@Sunnys-MacBook-Air qa_analysis_tool % streamlit run app.py
 
